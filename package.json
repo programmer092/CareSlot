@@ -1,11 +1,18 @@
 {
   "name": "careslot",
   "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
+  "private": true,
+  "description": "CareSlot monorepo (NestJS server + Vite/React client)",
   "license": "ISC",
-  "description": ""
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,green \"pnpm --filter server start:dev\" \"pnpm --filter client dev\"",
+    "build": "pnpm --filter client build && mkdir -p server/public && cp -R client/dist/. server/public/ && pnpm --filter server build",
+    "test": "pnpm --filter server test",
+    "lint": "pnpm -r run lint",
+    "clean": "rimraf server/dist client/dist server/public"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0",
+    "rimraf": "^3.0.2"
+  }
 }
