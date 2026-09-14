@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: careslot-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: careslot
+      POSTGRES_PASSWORD: careslot
+      POSTGRES_DB: careslot
+      TZ: UTC
+      PGTZ: UTC
+    ports:
+      - "5433:5432"
+    volumes:
+      - careslot-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U careslot -d careslot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  careslot-pgdata:

@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CLIENT
+  PROVIDER
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  password     String
+  name         String
+  role         Role     @default(CLIENT)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  slots    Slot[]    @relation("ProviderSlots")
+  bookings Booking[] @relation("ClientBookings")
+
+  @@map("users")
+}
+
+model Slot {
+  id         String   @id @default(uuid()) @db.Uuid
+  providerId String   @map("provider_id") @db.Uuid
+  startAt    DateTime @map("start_at") @db.Timestamptz(6)
+  endAt      DateTime @map("end_at") @db.Timestamptz(6)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  provider User      @relation("ProviderSlots", fields: [providerId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  @@unique([providerId, startAt, endAt])
+  @@index([providerId, startAt])
+  @@map("slots")
+}
+
+model Booking {
+  id          String        @id @default(uuid()) @db.Uuid
+  slotId      String        @map("slot_id") @db.Uuid
+  clientId    String        @map("client_id") @db.Uuid
+  status      BookingStatus @default(CONFIRMED)
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  cancelledAt DateTime?     @map("cancelled_at") @db.Timestamptz(6)
+
+  slot   Slot @relation(fields: [slotId], references: [id], onDelete: Restrict)
+  client User @relation("ClientBookings", fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId, createdAt(sort: Desc)])
+  @@index([slotId])
+  @@map("bookings")
+}
