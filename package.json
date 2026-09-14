@@ -9,6 +9,7 @@
     "build": "pnpm --filter client build && mkdir -p server/public && cp -R client/dist/. server/public/ && pnpm --filter server build",
     "test": "pnpm --filter server test",
     "lint": "pnpm -r run lint",
+    "seed": "pnpm --filter server prisma:seed",
     "clean": "rimraf server/dist client/dist server/public"
   },
   "devDependencies": {

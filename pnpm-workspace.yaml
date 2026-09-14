@@ -4,5 +4,7 @@ packages:
 
 allowBuilds:
   '@prisma/engines': true
+  '@scarf/scarf': false # analytics ping only; keep disabled
   '@swc/core': true
+  argon2: true
   prisma: true
