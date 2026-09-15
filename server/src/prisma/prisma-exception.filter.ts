@@ -12,12 +12,13 @@ import { Prisma } from '../generated/prisma/client';
 
 const UNIQUE_CONSTRAINT_MESSAGES: Record<string, string> = {
   users_email_key: 'Email is already registered',
-  slots_provider_id_start_at_end_at_key: 'An identical slot already exists',
   bookings_one_active_per_slot: 'A requested slot is already booked',
 };
 
 interface DriverAdapterMeta {
-  driverAdapterError?: { cause?: { constraint?: { index?: string } } };
+  driverAdapterError?: {
+    cause?: { code?: string; constraint?: { index?: string } };
+  };
 }
 
 @Catch(Prisma.PrismaClientKnownRequestError)
@@ -31,10 +32,16 @@ export class PrismaExceptionFilter extends BaseExceptionFilter {
   private toHttpException(
     error: Prisma.PrismaClientKnownRequestError,
   ): HttpException {
+    const cause = (error.meta as DriverAdapterMeta | undefined)
+      ?.driverAdapterError?.cause;
+
+    if (cause?.code === '23P01') {
+      return new ConflictException('Overlaps one of your existing slots');
+    }
+
     switch (error.code) {
       case 'P2002': {
-        const constraint = (error.meta as DriverAdapterMeta | undefined)
-          ?.driverAdapterError?.cause?.constraint?.index;
+        const constraint = cause?.constraint?.index;
         const message =
           (constraint && UNIQUE_CONSTRAINT_MESSAGES[constraint]) ??
           'Resource already exists';

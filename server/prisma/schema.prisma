@@ -18,13 +18,13 @@ enum BookingStatus {
 }
 
 model User {
-  id           String   @id @default(uuid()) @db.Uuid
-  email        String   @unique
-  password     String
-  name         String
-  role         Role     @default(CLIENT)
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(CLIENT)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   slots    Slot[]    @relation("ProviderSlots")
   bookings Booking[] @relation("ClientBookings")
@@ -43,7 +43,6 @@ model Slot {
   provider User      @relation("ProviderSlots", fields: [providerId], references: [id], onDelete: Cascade)
   bookings Booking[]
 
-  @@unique([providerId, startAt, endAt])
   @@index([providerId, startAt])
   @@map("slots")
 }

@@ -55,7 +55,10 @@ export class SlotsController {
     description: 'Invalid, past, or wrong-length window',
   })
   @ApiResponse({ status: 403, description: 'Caller is not a provider' })
-  @ApiResponse({ status: 409, description: 'Identical slot already exists' })
+  @ApiResponse({
+    status: 409,
+    description: 'Overlaps one of your existing slots',
+  })
   create(@Req() req: Request, @Body() dto: CreateSlotDto) {
     return this.slots.create(req.user.id, dto);
   }
@@ -69,7 +72,10 @@ export class SlotsController {
   })
   @ApiResponse({ status: 403, description: 'Slot belongs to another provider' })
   @ApiResponse({ status: 404, description: 'Slot not found' })
-  @ApiResponse({ status: 409, description: 'Slot has a confirmed booking' })
+  @ApiResponse({
+    status: 409,
+    description: 'Slot is booked, or new time overlaps another slot',
+  })
   update(
     @Req() req: Request,
     @Param('id', ParseUUIDPipe) slotId: string,
