@@ -9,7 +9,17 @@ import { ACCESS_TOKEN_COOKIE } from './auth/auth.constants';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const config = app.get(ConfigService);
+
   app.setGlobalPrefix('api');
+  app.enableCors({
+    origin: config
+      .get<string>('CORS_ORIGINS', '')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean),
+    credentials: true,
+  });
   app.use(cookieParser());
   app.useGlobalPipes(
     new ValidationPipe({
@@ -32,7 +42,7 @@ async function bootstrap() {
     SwaggerModule.createDocument(app, swaggerConfig),
   );
 
-  const port = app.get(ConfigService).get<number>('PORT', 3000);
+  const port = config.get<number>('PORT', 3000);
   await app.listen(port);
   Logger.log(`API listening on http://localhost:${port}/api`, 'Bootstrap');
   Logger.log(`Swagger UI at http://localhost:${port}/api/docs`, 'Bootstrap');

@@ -55,6 +55,7 @@ export class BookingsController {
 
   @Patch(':id/cancel')
   @ApiOperation({ summary: 'Cancel one of my bookings' })
+  @ApiResponse({ status: 400, description: 'Appointment already started' })
   @ApiResponse({ status: 200, description: 'Booking cancelled' })
   @ApiResponse({ status: 403, description: 'Booking belongs to someone else' })
   @ApiResponse({ status: 404, description: 'Booking not found' })

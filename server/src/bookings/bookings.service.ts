@@ -59,9 +59,25 @@ export class BookingsService {
     });
   }
 
+  listForProvider(providerId: string) {
+    return this.prisma.booking.findMany({
+      where: { slot: { providerId } },
+      select: {
+        id: true,
+        status: true,
+        createdAt: true,
+        cancelledAt: true,
+        slot: { select: { id: true, startAt: true, endAt: true } },
+        client: { select: { id: true, name: true, email: true } },
+      },
+      orderBy: { slot: { startAt: 'asc' } },
+    });
+  }
+
   async cancel(clientId: string, bookingId: string) {
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
+      include: { slot: { select: { startAt: true } } },
     });
     if (!booking) throw new NotFoundException('Booking not found');
     if (booking.clientId !== clientId) {
@@ -69,6 +85,9 @@ export class BookingsService {
     }
     if (booking.status === 'CANCELLED') {
       throw new ConflictException('Booking is already cancelled');
+    }
+    if (booking.slot.startAt <= new Date()) {
+      throw new BadRequestException('Past bookings cannot be cancelled');
     }
 
     return this.prisma.booking.update({

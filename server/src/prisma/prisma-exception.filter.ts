@@ -1,6 +1,5 @@
 import {
   ArgumentsHost,
-  BadRequestException,
   Catch,
   ConflictException,
   HttpException,
@@ -44,7 +43,9 @@ export class PrismaExceptionFilter extends BaseExceptionFilter {
       case 'P2025':
         return new NotFoundException('Resource not found');
       case 'P2003':
-        return new BadRequestException('Related resource does not exist');
+        return new ConflictException(
+          'Resource is still referenced by other data',
+        );
       default:
         this.logger.error(`Unhandled Prisma error ${error.code}`, error.stack);
         return new InternalServerErrorException();
