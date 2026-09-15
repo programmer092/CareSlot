@@ -1,6 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './components/layout/AppLayout'
-import { FullPageSpinner } from './components/ui/Spinner'
 import { LoginPage } from './features/auth/LoginPage'
 import { RegisterPage } from './features/auth/RegisterPage'
 import { useAuth } from './features/auth/useAuth'
@@ -10,9 +9,7 @@ import { ProviderSlotsPage } from './features/provider/ProviderSlotsPage'
 import { SlotsPage } from './features/slots/SlotsPage'
 
 export default function App() {
-  const { user, isLoading } = useAuth()
-
-  if (isLoading) return <FullPageSpinner />
+  const { user } = useAuth()
 
   if (!user) {
     return (
