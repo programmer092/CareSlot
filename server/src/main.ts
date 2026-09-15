@@ -32,6 +32,12 @@ async function bootstrap() {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('CareSlot')
+    .setDescription(
+      'Every response is wrapped as { success, data, meta_data, error }. ' +
+        'List endpoints accept ?page= and ?page_size= (default 25, max 100) ' +
+        'and report hasNext / hasPrevious in meta_data. Log in via ' +
+        'POST /api/auth/login; the cookie it sets authenticates this page.',
+    )
     .setVersion('1.0')
     .addCookieAuth(ACCESS_TOKEN_COOKIE)
     .addBearerAuth()

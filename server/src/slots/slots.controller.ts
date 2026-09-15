@@ -23,10 +23,11 @@ import type { Request } from 'express';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { BookingsService } from '../bookings/bookings.service';
 import { CreateSlotDto } from './dto/create-slot.dto';
+import { ProviderBookingsQueryDto } from '../bookings/dto/provider-bookings-query.dto';
+import { PaginationQueryDto } from '../shared/pagination.dto';
 import { ListSlotsQueryDto } from './dto/list-slots-query.dto';
 import { SlotsService } from './slots.service';
 
-// `me/...` routes are declared before `:id/...` so "me" is never parsed as an id.
 @ApiTags('providers')
 @ApiCookieAuth()
 @ApiBearerAuth()
@@ -35,9 +36,8 @@ export class SlotsController {
   constructor(
     private readonly slots: SlotsService,
     private readonly bookings: BookingsService,
-  ) {}
+  ) { }
 
-  // ---------- provider only ----------
 
   @Get('me/slots')
   @Roles('PROVIDER')
@@ -48,7 +48,7 @@ export class SlotsController {
 
   @Post('me/slots')
   @Roles('PROVIDER')
-  @ApiOperation({ summary: 'Publish an availability slot (30–60 minutes)' })
+  @ApiOperation({ summary: 'Publish an availability slot (30-60 minutes)' })
   @ApiResponse({ status: 201, description: 'Slot created' })
   @ApiResponse({
     status: 400,
@@ -99,17 +99,21 @@ export class SlotsController {
 
   @Get('me/bookings')
   @Roles('PROVIDER')
-  @ApiOperation({ summary: 'List bookings made on my slots' })
-  listMyBookings(@Req() req: Request) {
-    return this.bookings.listForProvider(req.user.id);
+  @ApiOperation({
+    summary: 'List bookings made on my slots (?search= by client name)',
+  })
+  listMyBookings(
+    @Req() req: Request,
+    @Query() query: ProviderBookingsQueryDto,
+  ) {
+    return this.bookings.listForProvider(req.user.id, query);
   }
 
-  // ---------- any signed-in user ----------
 
   @Get()
   @ApiOperation({ summary: 'List providers' })
-  listProviders() {
-    return this.slots.listProviders();
+  listProviders(@Query() query: PaginationQueryDto) {
+    return this.slots.listProviders(query);
   }
 
   @Get(':id/slots')

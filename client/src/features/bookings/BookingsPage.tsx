@@ -4,6 +4,7 @@ import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { PageHeader } from '../../components/ui/PageHeader'
+import { Pagination } from '../../components/ui/Pagination'
 import { Spinner } from '../../components/ui/Spinner'
 import { getErrorMessage } from '../../lib/api'
 import type { Booking } from '../../types/api'
@@ -11,7 +12,8 @@ import { BookingCard } from './BookingCard'
 import { useCancelBooking, useMyBookings } from './hooks'
 
 export function BookingsPage() {
-  const bookings = useMyBookings()
+  const [page, setPage] = useState(1)
+  const bookings = useMyBookings(page)
   const cancel = useCancelBooking()
   const [success, setSuccess] = useState<string | null>(null)
 
@@ -23,8 +25,8 @@ export function BookingsPage() {
   if (bookings.isPending) return <Spinner className="text-indigo-600" />
   if (bookings.isError) return <Alert variant="error">{getErrorMessage(bookings.error)}</Alert>
 
-  const confirmed = bookings.data.filter((b) => b.status === 'CONFIRMED')
-  const cancelled = bookings.data.filter((b) => b.status === 'CANCELLED')
+  const confirmed = bookings.data.items.filter((b) => b.status === 'CONFIRMED')
+  const cancelled = bookings.data.items.filter((b) => b.status === 'CANCELLED')
 
   return (
     <div className="space-y-6">
@@ -44,7 +46,7 @@ export function BookingsPage() {
         </Alert>
       )}
 
-      {bookings.data.length === 0 ? (
+      {bookings.data.items.length === 0 ? (
         <EmptyState
           title="No bookings yet"
           description="Browse a provider's availability and book your first slot."
@@ -63,6 +65,7 @@ export function BookingsPage() {
             onCancel={cancelBooking}
           />
           <BookingList title="Cancelled" bookings={cancelled} onCancel={cancelBooking} />
+          <Pagination meta={bookings.data.meta} onPageChange={setPage} />
         </>
       )}
     </div>

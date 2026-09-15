@@ -4,6 +4,7 @@ import { Button } from '../../components/ui/Button'
 import { DateRangeFields } from '../../components/ui/DateRangeFields'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { PageHeader } from '../../components/ui/PageHeader'
+import { Pagination } from '../../components/ui/Pagination'
 import { Spinner } from '../../components/ui/Spinner'
 import { getErrorMessage } from '../../lib/api'
 import { dateInputToIso, defaultDateRange, groupByDay } from '../../lib/format'
@@ -14,11 +15,12 @@ import { SlotForm } from './SlotForm'
 
 export function ProviderSlotsPage() {
   const [range, setRange] = useState(defaultDateRange)
+  const [page, setPage] = useState(1)
   const [creating, setCreating] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
 
-  const slots = useMySlots(dateInputToIso(range.from), dateInputToIso(range.to, true))
+  const slots = useMySlots(dateInputToIso(range.from), dateInputToIso(range.to, true), page)
   const create = useCreateSlot()
   const update = useUpdateSlot()
   const remove = useDeleteSlot()
@@ -74,7 +76,13 @@ export function ProviderSlotsPage() {
       )}
 
       <div className="rounded-xl border border-gray-200 bg-white p-4">
-        <DateRangeFields value={range} onChange={setRange} />
+        <DateRangeFields
+          value={range}
+          onChange={(next) => {
+            setRange(next)
+            setPage(1)
+          }}
+        />
       </div>
 
       {message && (
@@ -90,7 +98,7 @@ export function ProviderSlotsPage() {
 
       {slots.isPending && <Spinner className="text-indigo-600" />}
       {slots.isError && <Alert variant="error">{getErrorMessage(slots.error)}</Alert>}
-      {slots.data && slots.data.length === 0 && (
+      {slots.data && slots.data.items.length === 0 && (
         <EmptyState
           title="No slots in this range"
           description="Publish a slot to let clients book you."
@@ -98,9 +106,9 @@ export function ProviderSlotsPage() {
         />
       )}
 
-      {slots.data && slots.data.length > 0 && (
+      {slots.data && slots.data.items.length > 0 && (
         <div className="space-y-6">
-          {groupByDay(slots.data).map(([day, daySlots]) => (
+          {groupByDay(slots.data.items).map(([day, daySlots]) => (
             <section key={day}>
               <h3 className="mb-2 text-sm font-semibold text-gray-700">{day}</h3>
               <ul className="space-y-2">
@@ -132,6 +140,7 @@ export function ProviderSlotsPage() {
               </ul>
             </section>
           ))}
+          <Pagination meta={slots.data.meta} onPageChange={setPage} />
         </div>
       )}
     </div>

@@ -3,8 +3,8 @@ import { bookingsApi } from './api'
 
 const BOOKINGS_KEY = ['bookings'] as const
 
-export const useMyBookings = () =>
-  useQuery({ queryKey: BOOKINGS_KEY, queryFn: bookingsApi.mine })
+export const useMyBookings = (page: number) =>
+  useQuery({ queryKey: [...BOOKINGS_KEY, page], queryFn: () => bookingsApi.mine({ page }) })
 
 function useRefreshAfterChange() {
   const queryClient = useQueryClient()

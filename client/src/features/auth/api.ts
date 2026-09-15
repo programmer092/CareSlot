@@ -1,4 +1,4 @@
-import { api } from '../../lib/api'
+import { api, unwrap } from '../../lib/api'
 import type { User } from '../../types/api'
 
 export interface LoginInput {
@@ -11,10 +11,10 @@ export interface RegisterInput extends LoginInput {
 }
 
 export const authApi = {
-  me: () => api.get<User>('/auth/me').then((res) => res.data),
+  me: () => api.get<never>('/auth/me').then(unwrap<User>),
   login: (input: LoginInput) =>
-    api.post<{ user: User }>('/auth/login', input).then((res) => res.data.user),
+    api.post<never>('/auth/login', input).then(unwrap<{ user: User }>).then((d) => d.user),
   register: (input: RegisterInput) =>
-    api.post<{ user: User }>('/auth/register', input).then((res) => res.data.user),
+    api.post<never>('/auth/register', input).then(unwrap<{ user: User }>).then((d) => d.user),
   logout: () => api.post('/auth/logout').then(() => undefined),
 }

@@ -6,6 +6,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   Req,
 } from '@nestjs/common';
 import {
@@ -17,6 +18,7 @@ import {
 } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { PaginationQueryDto } from '../shared/pagination.dto';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 
@@ -49,8 +51,8 @@ export class BookingsController {
 
   @Get('me')
   @ApiOperation({ summary: 'List my bookings' })
-  listMine(@Req() req: Request) {
-    return this.bookings.listMine(req.user.id);
+  listMine(@Req() req: Request, @Query() query: PaginationQueryDto) {
+    return this.bookings.listMine(req.user.id, query);
   }
 
   @Patch(':id/cancel')

@@ -4,11 +4,17 @@ import { providerApi } from './api'
 const SLOTS_KEY = ['provider-slots'] as const
 const BOOKINGS_KEY = ['provider-bookings'] as const
 
-export const useMySlots = (from: string, to: string) =>
-  useQuery({ queryKey: [...SLOTS_KEY, from, to], queryFn: () => providerApi.mySlots(from, to) })
+export const useMySlots = (from: string, to: string, page: number) =>
+  useQuery({
+    queryKey: [...SLOTS_KEY, from, to, page],
+    queryFn: () => providerApi.mySlots(from, to, { page }),
+  })
 
-export const useProviderBookings = () =>
-  useQuery({ queryKey: BOOKINGS_KEY, queryFn: providerApi.myBookings })
+export const useProviderBookings = (search: string, page: number) =>
+  useQuery({
+    queryKey: [...BOOKINGS_KEY, search, page],
+    queryFn: () => providerApi.myBookings({ search: search || undefined, page }),
+  })
 
 function useRefreshSlots() {
   const queryClient = useQueryClient()

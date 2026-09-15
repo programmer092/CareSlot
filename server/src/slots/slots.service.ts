@@ -6,6 +6,8 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { paginate } from '../shared/pagination';
+import { PaginationQueryDto } from '../shared/pagination.dto';
 import { CreateSlotDto } from './dto/create-slot.dto';
 import { ListSlotsQueryDto } from './dto/list-slots-query.dto';
 
@@ -27,12 +29,15 @@ const activeBookingInclude = {
 export class SlotsService {
     constructor(private readonly prisma: PrismaService) { }
 
-    listProviders() {
-        return this.prisma.user.findMany({
-            where: { role: 'PROVIDER' },
-            select: { id: true, name: true, email: true },
-            orderBy: { name: 'asc' },
-        });
+    listProviders(query: PaginationQueryDto) {
+        return paginate(query, (page) =>
+            this.prisma.user.findMany({
+                where: { role: 'PROVIDER' },
+                select: { id: true, name: true, email: true },
+                orderBy: { name: 'asc' },
+                ...page,
+            }),
+        );
     }
 
     async create(providerId: string, dto: CreateSlotDto) {
@@ -41,17 +46,20 @@ export class SlotsService {
         return this.prisma.slot.create({ data: { providerId, ...times } });
     }
 
-    async listMine(providerId: string, query: ListSlotsQueryDto) {
+    listMine(providerId: string, query: ListSlotsQueryDto) {
         const { from, to } = this.parseRange(query);
-        const slots = await this.prisma.slot.findMany({
-            where: { providerId, startAt: { gte: from, lt: to } },
-            include: activeBookingInclude,
-            orderBy: { startAt: 'asc' },
+        return paginate(query, async (page) => {
+            const slots = await this.prisma.slot.findMany({
+                where: { providerId, startAt: { gte: from, lt: to } },
+                include: activeBookingInclude,
+                orderBy: { startAt: 'asc' },
+                ...page,
+            });
+            return slots.map(({ bookings, ...slot }) => ({
+                ...slot,
+                booking: bookings[0] ?? null,
+            }));
         });
-        return slots.map(({ bookings, ...slot }) => ({
-            ...slot,
-            booking: bookings[0] ?? null,
-        }));
     }
 
     async update(providerId: string, slotId: string, dto: CreateSlotDto) {
@@ -80,14 +88,17 @@ export class SlotsService {
 
         const now = new Date();
         const { from, to } = this.parseRange(query);
-        return this.prisma.slot.findMany({
-            where: {
-                providerId,
-                startAt: { gte: from > now ? from : now, lt: to },
-                bookings: { none: { status: 'CONFIRMED' } },
-            },
-            orderBy: { startAt: 'asc' },
-        });
+        return paginate(query, (page) =>
+            this.prisma.slot.findMany({
+                where: {
+                    providerId,
+                    startAt: { gte: from > now ? from : now, lt: to },
+                    bookings: { none: { status: 'CONFIRMED' } },
+                },
+                orderBy: { startAt: 'asc' },
+                ...page,
+            }),
+        );
     }
 
     private parseTimes(dto: CreateSlotDto) {

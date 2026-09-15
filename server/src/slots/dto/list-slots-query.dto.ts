@@ -1,7 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsISO8601, IsOptional } from 'class-validator';
+import { PaginationQueryDto } from '../../shared/pagination.dto';
 
-export class ListSlotsQueryDto {
+export class ListSlotsQueryDto extends PaginationQueryDto {
   @ApiPropertyOptional({
     example: '2026-09-20T00:00:00Z',
     description: 'Start of the range (inclusive). Defaults to now.',

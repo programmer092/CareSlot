@@ -1,10 +1,11 @@
-import { api } from '../../lib/api'
-import type { Booking } from '../../types/api'
+import { api, unwrap, unwrapPage } from '../../lib/api'
+import type { Booking, PageParams } from '../../types/api'
 
 export const bookingsApi = {
-  mine: () => api.get<Booking[]>('/bookings/me').then((res) => res.data),
+  mine: (params: PageParams) =>
+    api.get<never>('/bookings/me', { params }).then(unwrapPage<Booking>),
   create: (slotIds: string[]) =>
-    api.post<Booking[]>('/bookings', { slotIds }).then((res) => res.data),
+    api.post<never>('/bookings', { slotIds }).then(unwrap<Booking[]>),
   cancel: (bookingId: string) =>
-    api.patch<Booking>(`/bookings/${bookingId}/cancel`).then((res) => res.data),
+    api.patch<never>(`/bookings/${bookingId}/cancel`).then(unwrap<Booking>),
 }

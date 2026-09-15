@@ -7,6 +7,9 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { paginate } from '../shared/pagination';
+import { PaginationQueryDto } from '../shared/pagination.dto';
+import { ProviderBookingsQueryDto } from './dto/provider-bookings-query.dto';
 
 const bookingInclude = {
   slot: { include: { provider: { select: { id: true, name: true } } } },
@@ -51,27 +54,39 @@ export class BookingsService {
     );
   }
 
-  listMine(clientId: string) {
-    return this.prisma.booking.findMany({
-      where: { clientId },
-      include: bookingInclude,
-      orderBy: { slot: { startAt: 'asc' } },
-    });
+  listMine(clientId: string, query: PaginationQueryDto) {
+    return paginate(query, (page) =>
+      this.prisma.booking.findMany({
+        where: { clientId },
+        include: bookingInclude,
+        orderBy: { slot: { startAt: 'asc' } },
+        ...page,
+      }),
+    );
   }
 
-  listForProvider(providerId: string) {
-    return this.prisma.booking.findMany({
-      where: { slot: { providerId } },
-      select: {
-        id: true,
-        status: true,
-        createdAt: true,
-        cancelledAt: true,
-        slot: { select: { id: true, startAt: true, endAt: true } },
-        client: { select: { id: true, name: true, email: true } },
-      },
-      orderBy: { slot: { startAt: 'asc' } },
-    });
+  listForProvider(providerId: string, query: ProviderBookingsQueryDto) {
+    return paginate(query, (page) =>
+      this.prisma.booking.findMany({
+        where: {
+          slot: { providerId },
+          // ?search= narrows to clients whose name contains the text.
+          client: query.search
+            ? { name: { contains: query.search, mode: 'insensitive' } }
+            : undefined,
+        },
+        select: {
+          id: true,
+          status: true,
+          createdAt: true,
+          cancelledAt: true,
+          slot: { select: { id: true, startAt: true, endAt: true } },
+          client: { select: { id: true, name: true, email: true } },
+        },
+        orderBy: { slot: { startAt: 'asc' } },
+        ...page,
+      }),
+    );
   }
 
   async cancel(clientId: string, bookingId: string) {
