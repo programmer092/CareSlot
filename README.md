@@ -25,6 +25,7 @@ Appointment booking for care providers and their clients.
 7. [Running the app](#running-the-app)
 8. [API documentation](#api-documentation)
 9. [Testing](#testing)
+10. [Known limitations](#known-limitations)
 
 ---
 
@@ -341,3 +342,17 @@ Two Jest projects, both under `server/`:
 | `concurrency.e2e-spec.ts` | Concurrency | **8 parallel bookings of one slot → exactly one 201** · **provider edit blocks behind an in-flight booking transaction and then gets 409** (this test returned `200` against the previous implementation) · delete vs. book in parallel, 5 rounds, never both succeed · **6 parallel cancels → exactly one 200, five 409** (previously several 200s) · 5 parallel overlapping slot creates → one 201 |
 
 The in-flight-booking test opens a raw `pg` transaction that does what the booking service does (`SELECT … FOR SHARE` + `INSERT`) and holds it open; the provider's `PATCH` must stay pending until that transaction commits and must then be rejected. This makes the interleaving deterministic rather than hoping `Promise.all` hits the window.
+
+---
+
+## Known limitations
+
+Deliberate scope cuts and rough edges, grouped by area. Each row says what is missing, why it is acceptable for the current scope, and what the fix would look like.
+
+| Limitation | Description |
+| --- | --- |
+| **Only the client can cancel** | There is no provider-side cancellation, so a provider cannot free a booked slot for illness or holiday — the booking stands until the client cancels it. A `PATCH /providers/me/bookings/:id/cancel` would reuse the same compare-and-set; a `cancelled_by` column would keep the history honest. |
+| **No cancellation cut-off, no rescheduling** | A booking can be cancelled up to the second the slot starts, and "rescheduling" is cancel + book (two requests; the old slot is released before the new one is secured). A rule like "no cancellation within 24 h" is a one-line check in `BookingsService.cancel`, but it is a product decision, so it was left out. |
+| **Provider accounts are seed-only** | There is no provider sign-up, invitation flow or admin role; providers come from the seed or direct SQL. This is intentional for a care platform (see [Authentication](#authentication)), but a real deployment needs an onboarding path. |
+| **Deleting a slot deletes its cancelled bookings** | `slots` are hard-deleted. `SlotsService.remove` first deletes the slot's `CANCELLED` bookings so the FK lets the delete through, which means booking history is complete only for slots that still exist. Soft-deleting slots (`deleted_at`) would keep the history without changing the API. |
+| **No notifications** | Nothing is emailed or pushed on booking or cancellation; a provider learns about a new booking by refreshing their list. |
