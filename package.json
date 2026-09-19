@@ -6,13 +6,13 @@
   "license": "ISC",
   "scripts": {
     "dev": "concurrently -n server,client -c blue,green \"pnpm --filter server start:dev\" \"pnpm --filter client dev\"",
-    "build": "pnpm --filter client build && mkdir -p server/public && cp -R client/dist/. server/public/ && pnpm --filter server build",
+    "build": "pnpm --filter client build && pnpm --filter server build",
     "test": "pnpm --filter server test:all",
     "test:unit": "pnpm --filter server test",
     "test:e2e": "pnpm --filter server test:e2e",
     "lint": "pnpm -r run lint",
     "seed": "pnpm --filter server prisma:seed",
-    "clean": "rimraf server/dist client/dist server/public"
+    "clean": "rimraf server/dist client/dist"
   },
   "devDependencies": {
     "concurrently": "^8.0.0",

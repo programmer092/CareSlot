@@ -80,7 +80,6 @@ export async function signIn(
   return { user, cookie: await login(app, user) };
 }
 
-
 export function slotWindow(hoursFromNow: number, minutes = 60) {
   const start = new Date(Date.now() + hoursFromNow * HOUR_MS);
   start.setUTCSeconds(0, 0);

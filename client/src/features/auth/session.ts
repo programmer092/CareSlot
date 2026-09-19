@@ -22,6 +22,7 @@ export function writeStoredUser(user: User): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(user))
   } catch {
+    return;
   }
 }
 
@@ -29,6 +30,7 @@ export function clearStoredUser(): void {
   try {
     localStorage.removeItem(STORAGE_KEY)
   } catch {
+    return;
   }
 }
 

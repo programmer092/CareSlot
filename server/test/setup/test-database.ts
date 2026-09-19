@@ -12,7 +12,6 @@ export function devDatabaseUrl(): string {
   return process.env.DATABASE_URL ?? DEFAULT_DATABASE_URL;
 }
 
-
 export function testDatabaseUrl(): string {
   const url = new URL(process.env.TEST_DATABASE_URL ?? devDatabaseUrl());
   if (!process.env.TEST_DATABASE_URL) {
@@ -21,7 +20,7 @@ export function testDatabaseUrl(): string {
   if (url.toString() === new URL(devDatabaseUrl()).toString()) {
     throw new Error(
       'Refusing to run e2e tests against the development database ' +
-      '(TEST_DATABASE_URL must differ from DATABASE_URL)',
+        '(TEST_DATABASE_URL must differ from DATABASE_URL)',
     );
   }
   return url.toString();

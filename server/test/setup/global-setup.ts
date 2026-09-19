@@ -19,7 +19,7 @@ export default async function globalSetup(): Promise<void> {
   } catch (error) {
     throw new Error(
       `Cannot reach Postgres at ${devDatabaseUrl()} - start it with ` +
-      `"docker-compose up -d db" (${(error as Error).message})`,
+        `"docker-compose up -d db" (${(error as Error).message})`,
     );
   }
   const exists = await admin.query(

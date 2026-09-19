@@ -8,7 +8,6 @@ import { map, Observable } from 'rxjs';
 import type { ApiResponse } from './api-response';
 import { PaginatedResult } from './pagination';
 
-
 @Injectable()
 export class ResponseEnvelopeInterceptor implements NestInterceptor {
   intercept(

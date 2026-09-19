@@ -28,7 +28,7 @@ const activeBookingInclude = {
 
 @Injectable()
 export class SlotsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   listProviders(query: PaginationQueryDto) {
     return paginate(query, (page) =>
@@ -40,7 +40,6 @@ export class SlotsService {
       }),
     );
   }
-
 
   async create(providerId: string, dto: CreateSlotDto) {
     const times = this.parseTimes(dto);
@@ -152,7 +151,6 @@ export class SlotsService {
     if (from >= to) throw new BadRequestException('from must be before to');
     return { from, to };
   }
-
 
   private async lockOwnedAndFree(
     tx: Prisma.TransactionClient,

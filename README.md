@@ -242,7 +242,7 @@ pnpm dev                              # server (watch) + client (Vite) together
 pnpm --filter server start:dev        # API only, watch mode
 pnpm --filter client dev              # client only (needs the API running)
 
-pnpm build                            # client -> server/public, then compiles the server to server/dist
+pnpm build                            # client -> client/dist, server -> server/dist
 pnpm --filter server start:prod       # node server/dist/main
 ```
 

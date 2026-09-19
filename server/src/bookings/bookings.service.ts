@@ -23,7 +23,7 @@ type BookingWithSlot = Prisma.BookingGetPayload<{
 
 @Injectable()
 export class BookingsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   create(clientId: string, slotIds: string[]) {
     return this.prisma.$transaction(async (tx) => {
@@ -82,7 +82,6 @@ export class BookingsService {
       }),
     );
   }
-
 
   async cancel(clientId: string, bookingId: string) {
     const booking = await this.prisma.booking.findUnique({

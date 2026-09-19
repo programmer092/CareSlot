@@ -39,7 +39,7 @@ export function prismaErrorToHttp(
       const constraint = cause?.constraint?.index;
       return new ConflictException(
         (constraint && UNIQUE_CONSTRAINT_MESSAGES[constraint]) ??
-        'Resource already exists',
+          'Resource already exists',
       );
     }
     case 'P2025':

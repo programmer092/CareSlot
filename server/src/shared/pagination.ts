@@ -7,14 +7,12 @@ export interface PageMeta {
   hasPrevious: boolean;
 }
 
-
 export class PaginatedResult<T> {
   constructor(
     readonly items: T[],
     readonly meta: PageMeta,
-  ) { }
+  ) {}
 }
-
 
 export async function paginate<T>(
   query: PaginationQueryDto,

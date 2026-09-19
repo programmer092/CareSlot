@@ -36,8 +36,7 @@ export class SlotsController {
   constructor(
     private readonly slots: SlotsService,
     private readonly bookings: BookingsService,
-  ) { }
-
+  ) {}
 
   @Get('me/slots')
   @Roles('PROVIDER')
@@ -108,7 +107,6 @@ export class SlotsController {
   ) {
     return this.bookings.listForProvider(req.user.id, query);
   }
-
 
   @Get()
   @ApiOperation({ summary: 'List providers' })
